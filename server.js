@@ -13,12 +13,16 @@ const MongoStore= require('connect-mongo')(session);
 const flash= require('connect-flash');
 const mongoose= require('mongoose');
 const passport= require('passport');
-
+const morgan = require('morgan');
+require('./passport/passport-local');
 mongoose.Promise= global.Promise;
-mongoose.connect('mongodb://localhost:27017/chart_app',{ useNewUrlParser: true });
+mongoose.connect('mongodb://localhost:27017/ramu',{ useNewUrlParser: true });
 
 //app basic configaration setup
-
+app.use(morgan('dev', {
+    skip: function (req, res) { return res.statusCode < 400 }
+  }))
+   
 app.use(express.static('public'));
 app.set('view engine',ejs);
 app.set('views', path.join(__dirname, 'views'));
@@ -26,6 +30,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(cookieParser());
 app.use(validator());
+app.use(flash());
 app.use(session({
  secret:'secreat session',
  resave:true,
@@ -33,9 +38,14 @@ app.use(session({
  store:new MongoStore({ mongooseConnection: mongoose.connection })
 }));
 
+
+
 app.use(passport.initialize());
 app.use(passport.session());
-
+app.use(morgan('dev', {
+  skip: function (req, res) { return res.statusCode < 400 }
+}))
+ 
 
 
 
